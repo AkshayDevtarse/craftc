@@ -10,8 +10,6 @@ import { LessonSectionRender } from '@/components/LessonSectionRender';
 import { Badge } from '@/components/ui';
 import { getAllLessons } from '@/utils/curriculum';
 import { getCompletedLessons, markLessonComplete } from '@/utils/progress';
-import { getAllLessons } from '@/utils/curriculum';
-import { getCompletedLessons, markLessonComplete } from '@/utils/progress';
 
 function getCurriculum(id: string): Curriculum | null {
   if (id === 'c') return cCurriculum;
@@ -45,21 +43,6 @@ export function LessonPage() {
     setCompleted(true);
     const allLessons = getAllLessons(curriculum);
     if (allLessons.length > 0 && allLessons.every((item) => completedSlugs.includes(item.lesson.slug))) {
-      setShowCertificatePrompt(true);
-    }
-  }
-  const [completed, setCompleted] = useState(false);
-  const [showCertificatePrompt, setShowCertificatePrompt] = useState(false);
-
-  useEffect(() => {
-    setCompleted(getCompletedLessons(curriculum.id).includes(lesson.slug));
-  }, [curriculum.id, lesson.slug]);
-
-  function handleMarkComplete() {
-    const completedSlugs = markLessonComplete(curriculum.id, lesson.slug);
-    setCompleted(true);
-    const allLessons = getAllLessons(curriculum);
-    if (allLessons.length > 0 && allLessons.every(item => completedSlugs.includes(item.lesson.slug))) {
       setShowCertificatePrompt(true);
     }
   }
