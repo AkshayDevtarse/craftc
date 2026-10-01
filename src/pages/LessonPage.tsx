@@ -10,6 +10,8 @@ import { LessonSectionRender } from '@/components/LessonSectionRender';
 import { Badge } from '@/components/ui';
 import { getAllLessons } from '@/utils/curriculum';
 import { getCompletedLessons, markLessonComplete } from '@/utils/progress';
+import { getAllLessons } from '@/utils/curriculum';
+import { getCompletedLessons, markLessonComplete } from '@/utils/progress';
 
 function getCurriculum(id: string): Curriculum | null {
   if (id === 'c') return cCurriculum;
@@ -31,6 +33,21 @@ export function LessonPage() {
   }
 
   const { lesson, category } = found;
+  const [completed, setCompleted] = useState(false);
+  const [showCertificatePrompt, setShowCertificatePrompt] = useState(false);
+
+  useEffect(() => {
+    setCompleted(getCompletedLessons(curriculum.id).includes(lesson.slug));
+  }, [curriculum.id, lesson.slug]);
+
+  function handleMarkComplete() {
+    const completedSlugs = markLessonComplete(curriculum.id, lesson.slug);
+    setCompleted(true);
+    const allLessons = getAllLessons(curriculum);
+    if (allLessons.length > 0 && allLessons.every((item) => completedSlugs.includes(item.lesson.slug))) {
+      setShowCertificatePrompt(true);
+    }
+  }
   const [completed, setCompleted] = useState(false);
   const [showCertificatePrompt, setShowCertificatePrompt] = useState(false);
 
@@ -80,6 +97,27 @@ export function LessonPage() {
           <LessonSectionRender key={index} section={section} index={index} />
         ))}
       </div>
+
+      <div className="mt-12 border-t border-[var(--color-border)] pt-6 flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+        <div>
+          <h2 className="font-semibold text-[var(--color-text)]">Lesson progress</h2>
+          <p className="text-sm text-[var(--color-text-secondary)] mt-1">{completed ? 'This lesson is marked complete on this device.' : 'Mark this lesson complete when you finish studying it.'}</p>
+        </div>
+        <button onClick={handleMarkComplete} className="rounded-xl px-5 py-3 font-semibold bg-[var(--color-primary)] text-white hover:opacity-90">{completed ? 'Completed ✓' : 'Mark lesson complete'}</button>
+      </div>
+
+      {showCertificatePrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="certificate-prompt-title">
+          <div className="w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-2xl">
+            <h2 id="certificate-prompt-title" className="text-2xl font-bold">Course completed! 🎉</h2>
+            <p className="text-[var(--color-text-secondary)] mt-3">You have completed every lesson in {curriculum.title}. You can now request your certificate.</p>
+            <div className="flex flex-wrap gap-3 mt-6">
+              <Link to={`/certificate/${curriculum.id}`} className="rounded-xl bg-[var(--color-primary)] px-4 py-3 font-semibold text-white">Get Certified · ₹99</Link>
+              <button onClick={() => setShowCertificatePrompt(false)} className="rounded-xl border border-[var(--color-border)] px-4 py-3">Later</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
