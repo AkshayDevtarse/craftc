@@ -12,6 +12,7 @@ const InterviewPrepPage = lazy(() => import('@/pages/InterviewPrepPage').then((m
 const CheatsheetsPage = lazy(() => import('@/pages/CheatsheetsPage').then((m) => ({ default: m.CheatsheetsPage })));
 const DownloadsPage = lazy(() => import('@/pages/DownloadsPage').then((m) => ({ default: m.DownloadsPage })));
 const AboutPage = lazy(() => import('@/pages/AboutPage').then((m) => ({ default: m.AboutPage })));
+const CertificatePage = lazy(() => import('@/pages/CertificatePage').then((m) => ({ default: m.CertificatePage })));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
 function PageLoader() {
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/about" element={<MainLayout><AboutPage /></MainLayout>} />
           <Route path="/learn/:courseId" element={<LearnLayout><CoursePage /></LearnLayout>} />
           <Route path="/learn/:courseId/:lessonSlug" element={<LearnLayout><LessonPage /></LearnLayout>} />
+          <Route path="/certificate/:courseId" element={<MainLayout><CertificatePage /></MainLayout>} />
           <Route path="*" element={<MainLayout><NotFoundPage /></MainLayout>} />
         </Routes>
       </Suspense>
