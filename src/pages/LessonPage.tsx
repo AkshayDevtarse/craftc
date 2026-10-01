@@ -25,6 +25,22 @@ export function LessonPage() {
   const [completed, setCompleted] = useState(false);
   const [showCertificatePrompt, setShowCertificatePrompt] = useState(false);
 
+  useEffect(() => {
+    if (!curriculum || !found) {
+      setCompleted(false);
+      setShowCertificatePrompt(false);
+      return;
+    }
+
+    const completedSlugs = getCompletedLessons(curriculum.id);
+    const isLessonComplete = completedSlugs.includes(found.lesson.slug);
+    setCompleted(isLessonComplete);
+
+    const allLessons = getAllLessons(curriculum);
+    const isCourseComplete = allLessons.length > 0 && allLessons.every((item) => completedSlugs.includes(item.lesson.slug));
+    setShowCertificatePrompt(isCourseComplete);
+  }, [curriculum, found]);
+
   if (!curriculum || !found) {
     return (
       <div className="max-w-4xl mx-auto px-6 py-20 text-center">
@@ -34,18 +50,6 @@ export function LessonPage() {
   }
 
   const { lesson, category } = found;
-
-  useEffect(() => {
-    const completedSlugs = getCompletedLessons(curriculum.id);
-    const isLessonComplete = completedSlugs.includes(lesson.slug);
-    setCompleted(isLessonComplete);
-
-    const allLessons = getAllLessons(curriculum);
-    const isCourseComplete = allLessons.length > 0 && allLessons.every((item) => completedSlugs.includes(item.lesson.slug));
-    if (isCourseComplete) {
-      setShowCertificatePrompt(true);
-    }
-  }, [curriculum.id, lesson.slug]);
 
   function handleMarkComplete() {
     const completedSlugs = markLessonComplete(curriculum.id, lesson.slug);
