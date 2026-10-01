@@ -1,4 +1,5 @@
-import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Clock, BarChart3, ChevronRight, BookOpen } from 'lucide-react';
 import { cCurriculum } from '@/data/cCurriculum';
@@ -7,6 +8,8 @@ import type { Curriculum } from '@/types';
 import { findLessonBySlug } from '@/utils/curriculum';
 import { LessonSectionRender } from '@/components/LessonSectionRender';
 import { Badge } from '@/components/ui';
+import { getAllLessons } from '@/utils/curriculum';
+import { getCompletedLessons, markLessonComplete } from '@/utils/progress';
 
 function getCurriculum(id: string): Curriculum | null {
   if (id === 'c') return cCurriculum;
@@ -28,6 +31,21 @@ export function LessonPage() {
   }
 
   const { lesson, category } = found;
+  const [completed, setCompleted] = useState(false);
+  const [showCertificatePrompt, setShowCertificatePrompt] = useState(false);
+
+  useEffect(() => {
+    setCompleted(getCompletedLessons(curriculum.id).includes(lesson.slug));
+  }, [curriculum.id, lesson.slug]);
+
+  function handleMarkComplete() {
+    const completedSlugs = markLessonComplete(curriculum.id, lesson.slug);
+    setCompleted(true);
+    const allLessons = getAllLessons(curriculum);
+    if (allLessons.length > 0 && allLessons.every(item => completedSlugs.includes(item.lesson.slug))) {
+      setShowCertificatePrompt(true);
+    }
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
