@@ -22,6 +22,9 @@ export function LessonPage() {
   const curriculum = courseId ? getCurriculum(courseId) : null;
   const found = curriculum && lessonSlug ? findLessonBySlug(curriculum, lessonSlug) : null;
 
+  const [completed, setCompleted] = useState(false);
+  const [showCertificatePrompt, setShowCertificatePrompt] = useState(false);
+
   if (!curriculum || !found) {
     return (
       <div className="max-w-4xl mx-auto px-6 py-20 text-center">
@@ -31,18 +34,25 @@ export function LessonPage() {
   }
 
   const { lesson, category } = found;
-  const [completed, setCompleted] = useState(false);
-  const [showCertificatePrompt, setShowCertificatePrompt] = useState(false);
 
   useEffect(() => {
-    setCompleted(getCompletedLessons(curriculum.id).includes(lesson.slug));
+    const completedSlugs = getCompletedLessons(curriculum.id);
+    const isLessonComplete = completedSlugs.includes(lesson.slug);
+    setCompleted(isLessonComplete);
+
+    const allLessons = getAllLessons(curriculum);
+    const isCourseComplete = allLessons.length > 0 && allLessons.every((item) => completedSlugs.includes(item.lesson.slug));
+    if (isCourseComplete) {
+      setShowCertificatePrompt(true);
+    }
   }, [curriculum.id, lesson.slug]);
 
   function handleMarkComplete() {
     const completedSlugs = markLessonComplete(curriculum.id, lesson.slug);
     setCompleted(true);
     const allLessons = getAllLessons(curriculum);
-    if (allLessons.length > 0 && allLessons.every((item) => completedSlugs.includes(item.lesson.slug))) {
+    const isCourseComplete = allLessons.length > 0 && allLessons.every((item) => completedSlugs.includes(item.lesson.slug));
+    if (isCourseComplete) {
       setShowCertificatePrompt(true);
     }
   }
