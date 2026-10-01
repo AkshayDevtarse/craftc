@@ -24,22 +24,31 @@ export function LessonPage() {
 
   const [completed, setCompleted] = useState(false);
   const [showCertificatePrompt, setShowCertificatePrompt] = useState(false);
+  const [courseComplete, setCourseComplete] = useState(false);
 
   useEffect(() => {
     if (!curriculum || !found) {
       setCompleted(false);
+      setCourseComplete(false);
       setShowCertificatePrompt(false);
       return;
     }
 
     const completedSlugs = getCompletedLessons(curriculum.id);
-    const isLessonComplete = completedSlugs.includes(found.lesson.slug);
-    setCompleted(isLessonComplete);
-
     const allLessons = getAllLessons(curriculum);
-    const isCourseComplete = allLessons.length > 0 && allLessons.every((item) => completedSlugs.includes(item.lesson.slug));
-    setShowCertificatePrompt(isCourseComplete);
-  }, [curriculum, found]);
+    const isLessonComplete = completedSlugs.includes(found.lesson.slug);
+    const isCourseComplete =
+      allLessons.length > 0 &&
+      completedSlugs.length >= allLessons.length &&
+      allLessons.every((item) => completedSlugs.includes(item.lesson.slug));
+
+    setCompleted(isLessonComplete);
+    setCourseComplete(isCourseComplete);
+
+    if (isCourseComplete) {
+      setShowCertificatePrompt(true);
+    }
+  }, [curriculum?.id, found?.lesson.slug]);
 
   if (!curriculum || !found) {
     return (
@@ -55,7 +64,12 @@ export function LessonPage() {
     const completedSlugs = markLessonComplete(curriculum.id, lesson.slug);
     setCompleted(true);
     const allLessons = getAllLessons(curriculum);
-    const isCourseComplete = allLessons.length > 0 && allLessons.every((item) => completedSlugs.includes(item.lesson.slug));
+    const isCourseComplete =
+      allLessons.length > 0 &&
+      completedSlugs.length >= allLessons.length &&
+      allLessons.every((item) => completedSlugs.includes(item.lesson.slug));
+
+    setCourseComplete(isCourseComplete);
     if (isCourseComplete) {
       setShowCertificatePrompt(true);
     }
@@ -102,6 +116,16 @@ export function LessonPage() {
         </div>
         <button onClick={handleMarkComplete} className="rounded-xl px-5 py-3 font-semibold bg-[var(--color-primary)] text-white hover:opacity-90">{completed ? 'Completed ✓' : 'Mark lesson complete'}</button>
       </div>
+
+      {courseComplete && !showCertificatePrompt && (
+        <div className="mt-6 rounded-2xl border border-[var(--color-primary)]/40 bg-[var(--color-primary)]/10 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-bold text-[var(--color-text)]">🎉 Course Completed!</h2>
+            <p className="text-sm text-[var(--color-text-secondary)] mt-1">Your certificate is ready. Get your verified certificate for ₹99.</p>
+          </div>
+          <Link to={`/certificate/${curriculum.id}`} className="inline-flex justify-center rounded-xl bg-[var(--color-primary)] px-5 py-3 font-semibold text-white">Get Certified · ₹99</Link>
+        </div>
+      )}
 
       {showCertificatePrompt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="certificate-prompt-title">
