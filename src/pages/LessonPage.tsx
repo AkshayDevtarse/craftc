@@ -9,7 +9,7 @@ import { findLessonBySlug } from '@/utils/curriculum';
 import { LessonSectionRender } from '@/components/LessonSectionRender';
 import { Badge } from '@/components/ui';
 import { getAllLessons } from '@/utils/curriculum';
-import { getCompletedLessons, markLessonComplete } from '@/utils/progress';
+import { getCompletedLessons, getCourseProgress, markLessonComplete } from '@/utils/progress';
 
 function getCurriculum(id: string): Curriculum | null {
   if (id === 'c') return cCurriculum;
@@ -64,10 +64,11 @@ export function LessonPage() {
     const completedSlugs = markLessonComplete(curriculum.id, lesson.slug);
     setCompleted(true);
     const allLessons = getAllLessons(curriculum);
-    const isCourseComplete =
+    const progress = getCourseProgress(curriculum);
+    const isCourseComplete = progress.isComplete || (
       allLessons.length > 0 &&
-      completedSlugs.length >= allLessons.length &&
-      allLessons.every((item) => completedSlugs.includes(item.lesson.slug));
+      completedSlugs.length >= allLessons.length
+    );
 
     setCourseComplete(isCourseComplete);
     if (isCourseComplete) {
